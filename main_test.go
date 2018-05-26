@@ -72,18 +72,26 @@ func TestReadTweets(t *testing.T) {
 	os.Remove(filePath)
 	defer os.Remove(filePath)
 	t.Run("read tweets in to tweets struct", func(t *testing.T) {
-		tweet := "Random tweet"
-		f, err := os.Create(filePath)
-		defer f.Close()
-		if err != nil {
-			t.Fatal(err)
+		tdTweets := []struct {
+			tweet string
+		}{
+			{tweet: "random tweet"},
+			{tweet: "my tweet"},
+			{tweet: "heyyy"},
 		}
-		fmt.Fprintf(f, "%s\n", tweet)
+		for _, tt := range tdTweets {
+			f, err := os.Create(filePath)
+			if err != nil {
+				t.Fatal(err)
+			}
+			fmt.Fprintf(f, "%s\n", tt.tweet)
 
-		tweetFileData, _ := openTweetFile(filePath)
-		tweets := NewTweets(tweetFileData)
-		if tweets.tweets[0] != tweet {
-			t.Errorf("got '%s' want '%s'", tweets.tweets[0], tweet)
+			tweetFileData, _ := openTweetFile(filePath)
+			tweets := NewTweets(tweetFileData)
+			if tweets.tweets[0] != tt.tweet {
+				t.Errorf("got '%s' want '%s'", tweets.tweets[0], tt.tweet)
+			}
+			f.Close()
 		}
 	})
 }
