@@ -2,16 +2,16 @@ package main
 
 import (
 	"errors"
+	"io/ioutil"
+	"log"
 	"os"
+	"strings"
 )
 
 var (
 	errWebhookEnvVarNotFound = errors.New("webhook env var not found")
-	errTweetCSVNotFound      = errors.New("tweet csv not found")
+	errTweetFileEmpty        = errors.New("tweet file is empty")
 )
-
-type tweet struct {
-}
 
 func getWebhook(name string) (webhook string, err error) {
 	if _, ok := os.LookupEnv(name); !ok {
@@ -20,16 +20,33 @@ func getWebhook(name string) (webhook string, err error) {
 	return
 }
 
-func importTweets(file string) (*os.File, error) {
+func openTweetFile(file string) (*os.File, error) {
 	f, err := os.Open(file)
 	if err != nil {
-		return nil, errTweetCSVNotFound
+		return nil, err
+	} else if size, _ := f.Stat(); size.Size() == 0 {
+		return nil, errTweetFileEmpty
 	}
 	return f, nil
 }
 
+type tweets struct {
+	tweets []string
+}
+
+func NewTweets(tweetFile *os.File) *tweets {
+	tweetsRead, err := ioutil.ReadAll(tweetFile)
+	defer tweetFile.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	t := &tweets{tweets: strings.Split(string(tweetsRead), "\n")}
+	return t
+}
+
 // INIT
-//   Import all tweets
+//   Open tweet file
+//   Read tweets in to struct
 //   Get channel name
 
 // MAIN
