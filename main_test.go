@@ -20,6 +20,12 @@ func assertError(t *testing.T, got, want error) {
 		t.Errorf("got '%s' want '%s'", got, want)
 	}
 }
+func assertNoError(t *testing.T, got error) {
+	t.Helper()
+	if got != nil {
+		t.Error("got an error, didn't want one")
+	}
+}
 func TestEnvironmentalVariables(t *testing.T) {
 	t.Run("webhook env var doesn't exist", func(t *testing.T) {
 		_, err := getEnvVar("TEST_BORAT_SLACK_WEBHOOK", errWebhookEnvVarNotFound)
