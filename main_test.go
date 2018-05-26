@@ -11,22 +11,25 @@ const (
 	filePath = "./devops_borat_tweets_test.txt"
 )
 
-func TestGetWebhook(t *testing.T) {
-	t.Run("error raised if webhook is not found", func(t *testing.T) {
+func TestEnvironmentalVariables(t *testing.T) {
+	assertError := func(t *testing.T, got, want error) {
 		t.Helper()
-		_, err := getWebhook("BORAT_WEBHOOK")
-		if err == nil {
+		if got == nil {
 			t.Error("want an error got none")
 		}
+		if got != want {
+			t.Errorf("got '%s' want '%s'", got, want)
+		}
+
+	}
+	t.Run("webhook env var doesn't exist", func(t *testing.T) {
+		_, err := getEnvVar("TEST_BORAT_SLACK_WEBHOOK", errWebhookEnvVarNotFound)
+		assertError(t, err, errWebhookEnvVarNotFound)
 	})
 
-	t.Run("correct error message is raised if webhook env var not found", func(t *testing.T) {
-		t.Helper()
-		want := "webhook env var not found"
-		_, err := getWebhook("BORAT_WEBHOOK")
-		if err.Error() != want {
-			t.Errorf("got '%s' want '%s'", err, want)
-		}
+	t.Run("tweet file path env var doesn't exist", func(t *testing.T) {
+		_, err := getEnvVar("TEST_BORAT_TWEET_FILE", errTweetFilePathEnvVarNotFound)
+		assertError(t, err, errTweetFilePathEnvVarNotFound)
 	})
 }
 

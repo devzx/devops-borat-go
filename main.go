@@ -9,15 +9,16 @@ import (
 )
 
 var (
-	errWebhookEnvVarNotFound = errors.New("webhook env var not found")
-	errTweetFileEmpty        = errors.New("tweet file is empty")
+	errWebhookEnvVarNotFound       = errors.New("webhook env var not found")
+	errTweetFilePathEnvVarNotFound = errors.New("tweet file path env var not found")
+	errTweetFileEmpty              = errors.New("tweet file is empty")
 )
 
-func getWebhook(name string) (string, error) {
+func getEnvVar(name string, err error) (string, error) {
 	if webhook, ok := os.LookupEnv(name); ok {
 		return webhook, nil
 	}
-	return "", errWebhookEnvVarNotFound
+	return "", err
 }
 
 func openTweetFile(file string) (*os.File, error) {
