@@ -78,6 +78,7 @@ func TestReadTweets(t *testing.T) {
 		}{
 			{tweets: []string{"random tweet", "yooo"}},
 			{tweets: []string{" testing "}},
+			{tweets: []string{"this", "is", "", "a", "   "}},
 		}
 		for _, tt := range tdTweets {
 			f, err := os.Create(filePath)
@@ -96,8 +97,4 @@ func TestReadTweets(t *testing.T) {
 			f.Close()
 		}
 	})
-}
-
-func TestGetRandomTweet(t *testing.T) {
-
 }

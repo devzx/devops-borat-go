@@ -13,11 +13,11 @@ var (
 	errTweetFileEmpty        = errors.New("tweet file is empty")
 )
 
-func getWebhook(name string) (webhook string, err error) {
-	if _, ok := os.LookupEnv(name); !ok {
-		return "", errWebhookEnvVarNotFound
+func getWebhook(name string) (string, error) {
+	if webhook, ok := os.LookupEnv(name); ok {
+		return webhook, nil
 	}
-	return
+	return "", errWebhookEnvVarNotFound
 }
 
 func openTweetFile(file string) (*os.File, error) {
