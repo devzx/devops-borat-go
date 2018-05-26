@@ -40,7 +40,11 @@ func NewTweets(tweetFile *os.File) *tweets {
 	if err != nil {
 		log.Fatal(err)
 	}
-	t := &tweets{tweets: strings.Split(strings.TrimSpace(string(tweetsRead)), "\n")}
+	data := strings.Split(string(tweetsRead), "\n")
+	// When spliting an emtpy new line is added as an
+	// element to the slice, this removes that
+	data = data[:(len(data) - 1)]
+	t := &tweets{tweets: data}
 	return t
 }
 
