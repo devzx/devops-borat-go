@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"testing"
 )
 
@@ -73,23 +74,23 @@ func TestReadTweets(t *testing.T) {
 	defer os.Remove(filePath)
 	t.Run("read tweets in to tweets struct", func(t *testing.T) {
 		tdTweets := []struct {
-			tweet string
+			tweets []string
 		}{
-			{tweet: "random tweet"},
-			{tweet: "my tweet"},
-			{tweet: "heyyy"},
+			{tweets: []string{"random tweet", "yooo"}},
 		}
 		for _, tt := range tdTweets {
 			f, err := os.Create(filePath)
 			if err != nil {
 				t.Fatal(err)
 			}
-			fmt.Fprintf(f, "%s\n", tt.tweet)
+			for _, tweet := range tt.tweets {
+				fmt.Fprintf(f, "%s\n", tweet)
+			}
 
 			tweetFileData, _ := openTweetFile(filePath)
 			tweets := NewTweets(tweetFileData)
-			if tweets.tweets[0] != tt.tweet {
-				t.Errorf("got '%s' want '%s'", tweets.tweets[0], tt.tweet)
+			if !reflect.DeepEqual(tweets.tweets, tt.tweets) {
+				t.Errorf("got '%s' want '%s'", tweets.tweets, tt.tweets)
 			}
 			f.Close()
 		}

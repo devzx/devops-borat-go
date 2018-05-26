@@ -40,15 +40,15 @@ func NewTweets(tweetFile *os.File) *tweets {
 	if err != nil {
 		log.Fatal(err)
 	}
-	t := &tweets{tweets: strings.Split(string(tweetsRead), "\n")}
+	t := &tweets{tweets: strings.Split(strings.TrimSpace(string(tweetsRead)), "\n")}
 	return t
 }
 
 // INIT
+//   Get tweet file name
 //   Open tweet file
 //   Read tweets in to struct
 //   Get channel name
-
 // MAIN
 //   Select a random tweet -- Struct tweet -- struct contains JSON data
 //   Post tweet to channel  -- Method on tweet struct - compile payload and post to channel
