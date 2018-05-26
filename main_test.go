@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	filePath = "./devops_borat_tweets_test.txt"
+	filePath = "./test_devops_borat_tweets.txt"
 )
 
 func assertError(t *testing.T, got, want error) {
@@ -49,6 +49,9 @@ func TestOpenTweetFile(t *testing.T) {
 
 	t.Run("tweet file is empty", func(t *testing.T) {
 		_, err := os.Create(filePath)
+		if err != nil {
+			t.Error(err)
+		}
 		_, err = openTweetFile(filePath)
 		assertError(t, err, errTweetFileEmpty)
 	})
