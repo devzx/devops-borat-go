@@ -11,17 +11,16 @@ const (
 	filePath = "./devops_borat_tweets_test.txt"
 )
 
-func TestEnvironmentalVariables(t *testing.T) {
-	assertError := func(t *testing.T, got, want error) {
-		t.Helper()
-		if got == nil {
-			t.Error("want an error got none")
-		}
-		if got != want {
-			t.Errorf("got '%s' want '%s'", got, want)
-		}
-
+func assertError(t *testing.T, got, want error) {
+	t.Helper()
+	if got == nil {
+		t.Error("want an error got none")
 	}
+	if got != want {
+		t.Errorf("got '%s' want '%s'", got, want)
+	}
+}
+func TestEnvironmentalVariables(t *testing.T) {
 	t.Run("webhook env var doesn't exist", func(t *testing.T) {
 		_, err := getEnvVar("TEST_BORAT_SLACK_WEBHOOK", errWebhookEnvVarNotFound)
 		assertError(t, err, errWebhookEnvVarNotFound)
@@ -37,38 +36,15 @@ func TestOpenTweetFile(t *testing.T) {
 	os.Remove(filePath)
 	defer os.Remove(filePath)
 
-	t.Run("error raised if tweet file is not found", func(t *testing.T) {
-		t.Helper()
-		f, err := openTweetFile(filePath)
-		defer f.Close()
-		if err == nil {
-			t.Error("want an error got none")
-		}
+	t.Run("tweet file is not found", func(t *testing.T) {
+		_, err := openTweetFile(filePath)
+		assertError(t, err, err)
 	})
 
-	t.Run("error raised if tweet file is empty", func(t *testing.T) {
-		t.Helper()
+	t.Run("tweet file is empty", func(t *testing.T) {
 		_, err := os.Create(filePath)
-		if err != nil {
-			t.Fatal(err)
-		}
 		_, err = openTweetFile(filePath)
-		if err == nil {
-			t.Error("want an error got none")
-		}
-	})
-
-	t.Run("correct error message if tweet file is empty", func(t *testing.T) {
-		t.Helper()
-		_, err := os.Create(filePath)
-		if err != nil {
-			t.Fatal(err)
-		}
-		want := "tweet file is empty"
-		_, err = openTweetFile(filePath)
-		if err.Error() != want {
-			t.Errorf("got '%s' want '%s'", err, want)
-		}
+		assertError(t, err, errTweetFileEmpty)
 	})
 }
 
