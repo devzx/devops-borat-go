@@ -131,11 +131,9 @@ func TestGetTweet(t *testing.T) {
 		randomTweet1 := tweets.getTweet()
 		randomTweet2 := tweets.getTweet()
 		if randomTweet1 == randomTweet2 {
-			fmt.Println(randomTweet1, randomTweet2)
 			match++
 		}
 	}
-	fmt.Println(match)
 	if match > 20 {
 		t.Fatal("probably not random")
 	}
