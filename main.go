@@ -2,12 +2,21 @@ package main
 
 import (
 	"errors"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"math/rand"
+	"net/http"
 	"os"
 	"strings"
 	"time"
+)
+
+const (
+	tweetFileEnvVarName      = "TWEET_FILE_NAME"
+	slackWebhookEnvVarName   = "SLACK_WEBHOOK"
+	discordWebhookEnvVarName = "DISCORD_WEBHOOK"
 )
 
 var (
@@ -17,8 +26,8 @@ var (
 )
 
 func getEnvVar(name string, err error) (string, error) {
-	if webhook, ok := os.LookupEnv(name); ok {
-		return webhook, nil
+	if envVar, ok := os.LookupEnv(name); ok {
+		return envVar, nil
 	}
 	return "", err
 }
@@ -56,11 +65,72 @@ func (t *tweets) getTweet() string {
 	return t.tweets[rand.Intn(len(t.tweets))]
 }
 
-// INIT
-//   Get tweet file name
-//   Open tweet file
-//   Read tweets in to struct
-//   Get channel name
-// MAIN
-//   Select a random tweet -- Struct tweet -- struct contains JSON data
-//   Post tweet to channel  -- Method on tweet struct - compile payload and post to channel
+type slack struct {
+	contentType string
+	webhook     string
+	payload     io.Reader
+}
+
+func (s *slack) createPayload(text, iconUrl, username string) {
+	s.payload = strings.NewReader(fmt.Sprintf(`{"text": "%s", "icon_url": "%s", "username": "%s"}`, text, iconUrl, username))
+}
+
+func (s *slack) post() {
+	resp, err := http.Post(s.webhook, s.contentType, s.payload)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(resp)
+}
+
+type discord struct {
+	contentType string
+	webhook     string
+	payload     io.Reader
+}
+
+func (d *discord) createPayload(text, username string) {
+	d.payload = strings.NewReader(fmt.Sprintf(`{"content": "%s", "username": "%s"}`, text, username))
+}
+
+func (d *discord) post() {
+	resp, err := http.Post(d.webhook, d.contentType, d.payload)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(resp)
+}
+
+func main() {
+	tweetFile, err := getEnvVar(tweetFileEnvVarName, errTweetFilePathEnvVarNotFound)
+	if err != nil {
+		log.Fatal(err)
+	}
+	slackWebhook, err := getEnvVar(slackWebhookEnvVarName, errWebhookEnvVarNotFound)
+	if err != nil {
+		log.Fatal(err)
+	}
+	discordWebhook, err := getEnvVar(discordWebhookEnvVarName, errWebhookEnvVarNotFound)
+	if err != nil {
+		log.Printf("discord webhook not found, continuing")
+	}
+	openTweetFile, err := openTweetFile(tweetFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	t := NewTweets(openTweetFile)
+	tweet := t.getTweet()
+
+	slack := &slack{
+		contentType: "application/json",
+		webhook:     slackWebhook,
+	}
+	discord := &discord{
+		contentType: "application/json",
+		webhook:     discordWebhook,
+	}
+	slack.createPayload(tweet, "https://pbs.twimg.com/profile_images/1079908235/borat_855_18535194_0_0_12672_300_400x400.jpg", "DevOps Borat")
+	slack.post()
+	discord.createPayload(tweet, "DevOps Borat")
+	discord.post()
+}

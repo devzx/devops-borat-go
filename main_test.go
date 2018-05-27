@@ -48,6 +48,8 @@ func TestEnvironmentalVariables(t *testing.T) {
 	})
 
 	t.Run("webhook env var exist", func(t *testing.T) {
+		defer os.Unsetenv("TEST_BORAT_SLACK_WEBHOOK")
+
 		os.Setenv("TEST_BORAT_SLACK_WEBHOOK", "https://web.hook.com/random/23132")
 		slackWebhook, err := getEnvVar("TEST_BORAT_SLACK_WEBHOOK", errTweetFilePathEnvVarNotFound)
 		assertNoError(t, err)
@@ -55,6 +57,8 @@ func TestEnvironmentalVariables(t *testing.T) {
 	})
 
 	t.Run("tweet file path env var exist", func(t *testing.T) {
+		defer os.Unsetenv("TEST_BORAT_TWEET_FILE")
+
 		os.Setenv("TEST_BORAT_TWEET_FILE", filePath)
 		tweetFile, err := getEnvVar("TEST_BORAT_TWEET_FILE", errTweetFilePathEnvVarNotFound)
 		assertNoError(t, err)
