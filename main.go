@@ -14,6 +14,7 @@ import (
 )
 
 const (
+	botName                  = "DevOps Borat"
 	tweetFileEnvVarName      = "TWEET_FILE_NAME"
 	slackWebhookEnvVarName   = "SLACK_WEBHOOK"
 	discordWebhookEnvVarName = "DISCORD_WEBHOOK"
@@ -130,8 +131,8 @@ func main() {
 		contentType: "application/json",
 		webhook:     discordWebhook,
 	}
-	slack.createPayload(tweet, iconURL, "DevOps Borat")
+	slack.createPayload(tweet, iconURL, botName)
 	slack.post()
-	discord.createPayload(tweet, iconURL, "DevOps Borat")
+	discord.createPayload(tweet, iconURL, botName)
 	discord.post()
 }
