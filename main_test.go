@@ -27,6 +27,14 @@ func assertNoError(t *testing.T, got error) {
 	}
 }
 
+func assertTrue(t *testing.T, got, want string) {
+	t.Helper()
+	if got != want {
+		t.Errorf("got '%s' want '%s'", got, want)
+	}
+
+}
+
 func TestEnvironmentalVariables(t *testing.T) {
 	// Convert to TDT
 	t.Run("webhook env var doesn't exist", func(t *testing.T) {
@@ -41,14 +49,16 @@ func TestEnvironmentalVariables(t *testing.T) {
 
 	t.Run("webhook env var exist", func(t *testing.T) {
 		os.Setenv("TEST_BORAT_SLACK_WEBHOOK", "https://web.hook.com/random/23132")
-		_, err := getEnvVar("TEST_BORAT_SLACK_WEBHOOK", errTweetFilePathEnvVarNotFound)
+		slackWebhook, err := getEnvVar("TEST_BORAT_SLACK_WEBHOOK", errTweetFilePathEnvVarNotFound)
 		assertNoError(t, err)
+		assertTrue(t, slackWebhook, "https://web.hook.com/random/23132")
 	})
 
 	t.Run("tweet file path env var exist", func(t *testing.T) {
 		os.Setenv("TEST_BORAT_TWEET_FILE", filePath)
-		_, err := getEnvVar("TEST_BORAT_TWEET_FILE", errTweetFilePathEnvVarNotFound)
+		tweetFile, err := getEnvVar("TEST_BORAT_TWEET_FILE", errTweetFilePathEnvVarNotFound)
 		assertNoError(t, err)
+		assertTrue(t, tweetFile, filePath)
 	})
 }
 
@@ -74,6 +84,7 @@ func TestOpenTweetFile(t *testing.T) {
 func TestReadTweets(t *testing.T) {
 	os.Remove(filePath)
 	defer os.Remove(filePath)
+
 	t.Run("read tweets in to tweets struct", func(t *testing.T) {
 		tdTweets := []struct {
 			tweets []string
@@ -91,7 +102,8 @@ func TestReadTweets(t *testing.T) {
 				fmt.Fprintf(f, "%s\n", tweet)
 			}
 
-			tweetFileData, _ := openTweetFile(filePath)
+			tweetFileData, err := openTweetFile(filePath)
+			assertNoError(t, err)
 			tweets := NewTweets(tweetFileData)
 			if !reflect.DeepEqual(tweets.tweets, tt.tweets) {
 				t.Errorf("got '%s' want '%s'", tweets.tweets, tt.tweets)
@@ -99,4 +111,32 @@ func TestReadTweets(t *testing.T) {
 			f.Close()
 		}
 	})
+}
+
+func TestGetTweet(t *testing.T) {
+	os.Remove(filePath)
+	defer os.Remove(filePath)
+
+	tweetsS := []string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+		"11", "12", "13", "14", "15", "16", "17", "18", "19", "20"}
+	f, _ := os.Create(filePath)
+	defer f.Close()
+	for _, tweet := range tweetsS {
+		fmt.Fprintf(f, "%s\n", tweet)
+	}
+	tweetFileData, _ := openTweetFile(filePath)
+	tweets := NewTweets(tweetFileData)
+	var match int
+	for i := 0; i < 100; i++ {
+		randomTweet1 := tweets.getTweet()
+		randomTweet2 := tweets.getTweet()
+		if randomTweet1 == randomTweet2 {
+			fmt.Println(randomTweet1, randomTweet2)
+			match++
+		}
+	}
+	fmt.Println(match)
+	if match > 20 {
+		t.Fatal("probably not random")
+	}
 }

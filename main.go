@@ -4,8 +4,10 @@ import (
 	"errors"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"strings"
+	"time"
 )
 
 var (
@@ -47,6 +49,11 @@ func NewTweets(tweetFile *os.File) *tweets {
 	data = data[:(len(data) - 1)]
 	t := &tweets{tweets: data}
 	return t
+}
+
+func (t *tweets) getTweet() string {
+	rand.Seed(time.Now().UnixNano())
+	return t.tweets[rand.Intn(len(t.tweets))]
 }
 
 // INIT
