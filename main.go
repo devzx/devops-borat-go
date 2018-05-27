@@ -17,6 +17,7 @@ const (
 	tweetFileEnvVarName      = "TWEET_FILE_NAME"
 	slackWebhookEnvVarName   = "SLACK_WEBHOOK"
 	discordWebhookEnvVarName = "DISCORD_WEBHOOK"
+	iconURL                  = "https://pbs.twimg.com/profile_images/1079908235/borat_855_18535194_0_0_12672_300_400x400.jpg"
 )
 
 var (
@@ -71,8 +72,8 @@ type slack struct {
 	payload     io.Reader
 }
 
-func (s *slack) createPayload(text, iconUrl, username string) {
-	s.payload = strings.NewReader(fmt.Sprintf(`{"text": "%s", "icon_url": "%s", "username": "%s"}`, text, iconUrl, username))
+func (s *slack) createPayload(text, icon, username string) {
+	s.payload = strings.NewReader(fmt.Sprintf(`{"text": "%s", "icon_url": "%s", "username": "%s"}`, text, icon, username))
 }
 
 func (s *slack) post() {
@@ -89,8 +90,8 @@ type discord struct {
 	payload     io.Reader
 }
 
-func (d *discord) createPayload(text, username string) {
-	d.payload = strings.NewReader(fmt.Sprintf(`{"content": "%s", "username": "%s"}`, text, username))
+func (d *discord) createPayload(text, icon, username string) {
+	d.payload = strings.NewReader(fmt.Sprintf(`{"content": "%s", "avatar_url": "%s", "username": "%s"}`, text, icon, username))
 }
 
 func (d *discord) post() {
@@ -129,8 +130,8 @@ func main() {
 		contentType: "application/json",
 		webhook:     discordWebhook,
 	}
-	slack.createPayload(tweet, "https://pbs.twimg.com/profile_images/1079908235/borat_855_18535194_0_0_12672_300_400x400.jpg", "DevOps Borat")
+	slack.createPayload(tweet, iconURL, "DevOps Borat")
 	slack.post()
-	discord.createPayload(tweet, "DevOps Borat")
+	discord.createPayload(tweet, iconURL, "DevOps Borat")
 	discord.post()
 }
