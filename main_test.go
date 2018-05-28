@@ -146,11 +146,31 @@ func TestGetTweet(t *testing.T) {
 }
 
 func TestCreatePayload(t *testing.T) {
-	slack := &slack{
-		contentType: "application/json",
-		webhook:     "https://random.webhook.com/awe132",
+	testCases := []struct {
+		desc    string
+		want    string
+		tweet   string
+		service service
+	}{
+		{
+			desc:    "test slack payload",
+			want:    `{"username":"` + botName + `","icon_url":"` + iconURL + `","text":"test"}`,
+			tweet:   "test",
+			service: &slack{},
+		},
+		{
+			desc:    "test discord payload",
+			want:    `{"username":"` + botName + `","avatar_url":"` + iconURL + `","content":"test"}`,
+			tweet:   "test",
+			service: &discord{},
+		},
 	}
-	//want := `{"text": "test"}`
-	slack.createPayload("test")
-	//	assertTrue(t, got, want)
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			got, _ := tC.service.createPayload(tC.tweet)
+			if got.String() != tC.want {
+				t.Errorf("got '%s' want '%s'", got, tC.want)
+			}
+		})
+	}
 }

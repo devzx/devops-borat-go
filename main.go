@@ -1,9 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -76,17 +76,41 @@ type slack struct {
 	}
 }
 
-func (s *slack) createPayload(tweet string) {
+func (s *slack) createPayload(tweet string) (*bytes.Buffer, error) {
 	s.payload.Text = tweet
 	s.payload.IconURL = iconURL
 	s.payload.Username = botName
-	b, _ := json.Marshal(s.payload)
-	fmt.Printf("%s", b)
+	b, err := json.Marshal(s.payload)
+	if err != nil {
+		return nil, err
+	}
+	return bytes.NewBuffer(b), nil
 }
 
-//func (d *discord) createPayload(text, icon, username string) {
-//	d.payload = strings.NewReader(fmt.Sprintf(`{"content": "%s", "avatar_url": "%s", "username": "%s"}`, text, icon, username))
-//}
+type discord struct {
+	contentType string
+	webhook     string
+	payload     struct {
+		Username  string `json:"username"`
+		AvatarURL string `json:"avatar_url"`
+		Content   string `json:"content"`
+	}
+}
+
+func (d *discord) createPayload(tweet string) (*bytes.Buffer, error) {
+	d.payload.Content = tweet
+	d.payload.AvatarURL = iconURL
+	d.payload.Username = botName
+	b, err := json.Marshal(d.payload)
+	if err != nil {
+		return nil, err
+	}
+	return bytes.NewBuffer(b), nil
+}
+
+type service interface {
+	createPayload(string) (*bytes.Buffer, error)
+}
 
 //func main() {
 //	tweetFile, err := getEnvVar(tweetFileEnvVarName, errTweetFilePathEnvVarNotFound)
