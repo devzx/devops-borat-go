@@ -119,7 +119,7 @@ func TestReadTweets(t *testing.T) {
 	})
 }
 
-func TestGetTweet(t *testing.T) {
+func TestGetRandomTweet(t *testing.T) {
 	os.Remove(filePath)
 	defer os.Remove(filePath)
 
@@ -167,10 +167,9 @@ func TestCreatePayload(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			got, _ := tC.service.createPayload(tC.tweet)
-			if got.String() != tC.want {
-				t.Errorf("got '%s' want '%s'", got, tC.want)
-			}
+			got, err := tC.service.createPayload(tC.tweet)
+			assertTrue(t, got.String(), tC.want)
+			assertNoError(t, err)
 		})
 	}
 }
