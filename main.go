@@ -112,36 +112,5 @@ type service interface {
 	createPayload(string) (*bytes.Buffer, error)
 }
 
-//func main() {
-//	tweetFile, err := getEnvVar(tweetFileEnvVarName, errTweetFilePathEnvVarNotFound)
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//	slackWebhook, err := getEnvVar(slackWebhookEnvVarName, errWebhookEnvVarNotFound)
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//	discordWebhook, err := getEnvVar(discordWebhookEnvVarName, errWebhookEnvVarNotFound)
-//	if err != nil {
-//		log.Printf("discord webhook not found, continuing")
-//	}
-//	openTweetFile, err := openTweetFile(tweetFile)
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//	t := NewTweets(openTweetFile)
-//	tweet := t.getTweet()
-//
-//	slack := &slack{
-//		contentType: "application/json",
-//		webhook:     slackWebhook,
-//	}
-//	discord := &discord{
-//		contentType: "application/json",
-//		webhook:     discordWebhook,
-//	}
-//	slack.createPayload(tweet, iconURL, botName)
-//	slack.post()
-//	discord.createPayload(tweet, iconURL, botName)
-//	discord.post()
-//}
+func main() {
+}
