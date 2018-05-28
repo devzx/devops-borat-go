@@ -45,8 +45,8 @@ func TestEnvironmentalVariables(t *testing.T) {
 	})
 
 	t.Run("tweet file path env var doesn't exist", func(t *testing.T) {
-		_, err := getEnvVar(testTweetFileEnvVarName, errTweetFilePathEnvVarNotFound)
-		assertError(t, err, errTweetFilePathEnvVarNotFound)
+		_, err := getEnvVar(testTweetFileEnvVarName, errTweetFileEnvVarNotFound)
+		assertError(t, err, errTweetFileEnvVarNotFound)
 	})
 
 	t.Run("webhook env var exists", func(t *testing.T) {
@@ -62,7 +62,7 @@ func TestEnvironmentalVariables(t *testing.T) {
 		defer os.Unsetenv(testTweetFileEnvVarName)
 
 		os.Setenv(testTweetFileEnvVarName, filePath)
-		tweetFile, err := getEnvVar(testTweetFileEnvVarName, errTweetFilePathEnvVarNotFound)
+		tweetFile, err := getEnvVar(testTweetFileEnvVarName, errTweetFileEnvVarNotFound)
 		assertNoError(t, err)
 		assertTrue(t, tweetFile, filePath)
 	})

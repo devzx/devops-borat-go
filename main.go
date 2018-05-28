@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"math/rand"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -21,9 +22,10 @@ const (
 )
 
 var (
-	errWebhookEnvVarNotFound       = errors.New("webhook env var not found")
-	errTweetFilePathEnvVarNotFound = errors.New("tweet file path env var not found")
-	errTweetFileEmpty              = errors.New("tweet file is empty")
+	errWebhookEnvVarNotFound   = errors.New("webhook env var not found")
+	errTweetFileEnvVarNotFound = errors.New("tweet file path env var not found")
+	errTweetFileEmpty          = errors.New("tweet file is empty")
+	errNoWebhooksFound         = errors.New("no webhooks found")
 )
 
 func getEnvVar(name string, err error) (string, error) {
@@ -86,6 +88,13 @@ func (s *slack) createPayload(tweet string) (*bytes.Buffer, error) {
 	}
 	return bytes.NewBuffer(b), nil
 }
+func (s *slack) post(payload *bytes.Buffer) (*http.Response, error) {
+	resp, err := http.Post(s.webhook, s.contentType, payload)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
 
 type discord struct {
 	contentType string
@@ -108,9 +117,63 @@ func (d *discord) createPayload(tweet string) (*bytes.Buffer, error) {
 	return bytes.NewBuffer(b), nil
 }
 
+func (d *discord) post(payload *bytes.Buffer) (*http.Response, error) {
+	resp, err := http.Post(d.webhook, d.contentType, payload)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
 type service interface {
 	createPayload(string) (*bytes.Buffer, error)
+	post(*bytes.Buffer) (*http.Response, error)
 }
 
 func main() {
+	slackWebhook, err := getEnvVar(slackWebhookEnvVarName, errWebhookEnvVarNotFound)
+	if err != nil {
+		log.Println(err)
+	}
+	discordWebhook, err := getEnvVar(discordWebhookEnvVarName, errWebhookEnvVarNotFound)
+	if err != nil {
+		log.Println(err)
+	}
+	if slackWebhook == "" && discordWebhook == "" {
+		log.Fatal(errNoWebhooksFound)
+	}
+	tweetFile, err := getEnvVar(tweetFileEnvVarName, errTweetFileEnvVarNotFound)
+	if err != nil {
+		log.Fatal(err)
+	}
+	tweetFileContent, err := openTweetFile(tweetFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tweets := NewTweets(tweetFileContent)
+	tweet := tweets.getTweet()
+
+	var services []service
+
+	if slackWebhook != "" {
+		services = append(services, &slack{contentType: "application/json", webhook: slackWebhook})
+	}
+	if discordWebhook != "" {
+		services = append(services, &discord{contentType: "application/json", webhook: discordWebhook})
+	}
+
+	for _, service := range services {
+		body, err := service.createPayload(tweet)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		resp, err := service.post(body)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		log.Println(resp)
+	}
 }
