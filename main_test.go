@@ -8,7 +8,9 @@ import (
 )
 
 const (
-	filePath = "./test_devops_borat_tweets.txt"
+	filePath                   = "./test_devops_borat_tweets.txt"
+	testSlackWebhookEnvVarName = "TEST_" + slackWebhookEnvVarName
+	testTweetFileEnvVarName    = "TEST_" + tweetFileEnvVarName
 )
 
 func assertError(t *testing.T, got, want error) {
@@ -20,6 +22,7 @@ func assertError(t *testing.T, got, want error) {
 		t.Errorf("got '%s' want '%s'", got, want)
 	}
 }
+
 func assertNoError(t *testing.T, got error) {
 	t.Helper()
 	if got != nil {
@@ -32,35 +35,34 @@ func assertTrue(t *testing.T, got, want string) {
 	if got != want {
 		t.Errorf("got '%s' want '%s'", got, want)
 	}
-
 }
 
 func TestEnvironmentalVariables(t *testing.T) {
 	// Convert to TDT
 	t.Run("webhook env var doesn't exist", func(t *testing.T) {
-		_, err := getEnvVar("TEST_BORAT_SLACK_WEBHOOK", errWebhookEnvVarNotFound)
+		_, err := getEnvVar(testSlackWebhookEnvVarName, errWebhookEnvVarNotFound)
 		assertError(t, err, errWebhookEnvVarNotFound)
 	})
 
 	t.Run("tweet file path env var doesn't exist", func(t *testing.T) {
-		_, err := getEnvVar("TEST_BORAT_TWEET_FILE", errTweetFilePathEnvVarNotFound)
+		_, err := getEnvVar(testTweetFileEnvVarName, errTweetFilePathEnvVarNotFound)
 		assertError(t, err, errTweetFilePathEnvVarNotFound)
 	})
 
-	t.Run("webhook env var exist", func(t *testing.T) {
-		defer os.Unsetenv("TEST_BORAT_SLACK_WEBHOOK")
+	t.Run("webhook env var exists", func(t *testing.T) {
+		defer os.Unsetenv(testSlackWebhookEnvVarName)
 
-		os.Setenv("TEST_BORAT_SLACK_WEBHOOK", "https://web.hook.com/random/23132")
-		slackWebhook, err := getEnvVar("TEST_BORAT_SLACK_WEBHOOK", errTweetFilePathEnvVarNotFound)
+		os.Setenv(testSlackWebhookEnvVarName, "https://web.hook.com/random/23132")
+		slackWebhook, err := getEnvVar(testSlackWebhookEnvVarName, errWebhookEnvVarNotFound)
 		assertNoError(t, err)
 		assertTrue(t, slackWebhook, "https://web.hook.com/random/23132")
 	})
 
 	t.Run("tweet file path env var exist", func(t *testing.T) {
-		defer os.Unsetenv("TEST_BORAT_TWEET_FILE")
+		defer os.Unsetenv(testTweetFileEnvVarName)
 
-		os.Setenv("TEST_BORAT_TWEET_FILE", filePath)
-		tweetFile, err := getEnvVar("TEST_BORAT_TWEET_FILE", errTweetFilePathEnvVarNotFound)
+		os.Setenv(testTweetFileEnvVarName, filePath)
+		tweetFile, err := getEnvVar(testTweetFileEnvVarName, errTweetFilePathEnvVarNotFound)
 		assertNoError(t, err)
 		assertTrue(t, tweetFile, filePath)
 	})
@@ -141,4 +143,14 @@ func TestGetTweet(t *testing.T) {
 	if match > 20 {
 		t.Fatal("probably not random")
 	}
+}
+
+func TestCreatePayload(t *testing.T) {
+	slack := &slack{
+		contentType: "application/json",
+		webhook:     "https://random.webhook.com/awe132",
+	}
+	//want := `{"text": "test"}`
+	slack.createPayload("test")
+	//	assertTrue(t, got, want)
 }

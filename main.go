@@ -1,13 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"math/rand"
-	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -15,7 +14,7 @@ import (
 
 const (
 	botName                  = "DevOps Borat"
-	tweetFileEnvVarName      = "TWEET_FILE_NAME"
+	tweetFileEnvVarName      = "TWEET_FILE"
 	slackWebhookEnvVarName   = "SLACK_WEBHOOK"
 	discordWebhookEnvVarName = "DISCORD_WEBHOOK"
 	iconURL                  = "https://pbs.twimg.com/profile_images/1079908235/borat_855_18535194_0_0_12672_300_400x400.jpg"
@@ -70,69 +69,55 @@ func (t *tweets) getTweet() string {
 type slack struct {
 	contentType string
 	webhook     string
-	payload     io.Reader
+	payload     struct {
+		Username string `json:"username"`
+		IconURL  string `json:"icon_url"`
+		Text     string `json:"text"`
+	}
 }
 
-func (s *slack) createPayload(text, icon, username string) {
-	s.payload = strings.NewReader(fmt.Sprintf(`{"text": "%s", "icon_url": "%s", "username": "%s"}`, text, icon, username))
+func (s *slack) createPayload(tweet string) {
+	s.payload.Text = tweet
+	s.payload.IconURL = iconURL
+	s.payload.Username = botName
+	b, _ := json.Marshal(s.payload)
+	fmt.Printf("%s", b)
 }
 
-func (s *slack) post() {
-	resp, err := http.Post(s.webhook, s.contentType, s.payload)
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println(resp)
-}
+//func (d *discord) createPayload(text, icon, username string) {
+//	d.payload = strings.NewReader(fmt.Sprintf(`{"content": "%s", "avatar_url": "%s", "username": "%s"}`, text, icon, username))
+//}
 
-type discord struct {
-	contentType string
-	webhook     string
-	payload     io.Reader
-}
-
-func (d *discord) createPayload(text, icon, username string) {
-	d.payload = strings.NewReader(fmt.Sprintf(`{"content": "%s", "avatar_url": "%s", "username": "%s"}`, text, icon, username))
-}
-
-func (d *discord) post() {
-	resp, err := http.Post(d.webhook, d.contentType, d.payload)
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println(resp)
-}
-
-func main() {
-	tweetFile, err := getEnvVar(tweetFileEnvVarName, errTweetFilePathEnvVarNotFound)
-	if err != nil {
-		log.Fatal(err)
-	}
-	slackWebhook, err := getEnvVar(slackWebhookEnvVarName, errWebhookEnvVarNotFound)
-	if err != nil {
-		log.Fatal(err)
-	}
-	discordWebhook, err := getEnvVar(discordWebhookEnvVarName, errWebhookEnvVarNotFound)
-	if err != nil {
-		log.Printf("discord webhook not found, continuing")
-	}
-	openTweetFile, err := openTweetFile(tweetFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-	t := NewTweets(openTweetFile)
-	tweet := t.getTweet()
-
-	slack := &slack{
-		contentType: "application/json",
-		webhook:     slackWebhook,
-	}
-	discord := &discord{
-		contentType: "application/json",
-		webhook:     discordWebhook,
-	}
-	slack.createPayload(tweet, iconURL, botName)
-	slack.post()
-	discord.createPayload(tweet, iconURL, botName)
-	discord.post()
-}
+//func main() {
+//	tweetFile, err := getEnvVar(tweetFileEnvVarName, errTweetFilePathEnvVarNotFound)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//	slackWebhook, err := getEnvVar(slackWebhookEnvVarName, errWebhookEnvVarNotFound)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//	discordWebhook, err := getEnvVar(discordWebhookEnvVarName, errWebhookEnvVarNotFound)
+//	if err != nil {
+//		log.Printf("discord webhook not found, continuing")
+//	}
+//	openTweetFile, err := openTweetFile(tweetFile)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//	t := NewTweets(openTweetFile)
+//	tweet := t.getTweet()
+//
+//	slack := &slack{
+//		contentType: "application/json",
+//		webhook:     slackWebhook,
+//	}
+//	discord := &discord{
+//		contentType: "application/json",
+//		webhook:     discordWebhook,
+//	}
+//	slack.createPayload(tweet, iconURL, botName)
+//	slack.post()
+//	discord.createPayload(tweet, iconURL, botName)
+//	discord.post()
+//}
