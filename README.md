@@ -1,4 +1,7 @@
 # devops-borat-go
+[![Build Status](https://travis-ci.org/devzx/devops-borat-go.svg?branch=master)](https://travis-ci.org/devzx/devops-borat-go)
+----
+
 Rewrite of https://github.com/devzx/devops-borat in [Golang](https://golang.org/) .  
 A fun little app that posts a random [DevOps Borat](https://twitter.com/DEVOPS_BORAT) tweet to a given chat channel.
 
