@@ -16,8 +16,8 @@ script:
 
 before_deploy:
   - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
-  - docker tag $IMAGE_NAME:latest
-  - docker tag $IMAGE_NAME:$TRAVIS_COMMIT
+  - docker tag $IMAGE_NAME $IMAGE_NAME:latest
+  - docker tag $IMAGE_NAME $IMAGE_NAME:$TRAVIS_COMMIT
 
 deploy:
   provider: script
