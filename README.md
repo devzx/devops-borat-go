@@ -5,12 +5,11 @@ A fun little app that posts a random [DevOps Borat](https://twitter.com/DEVOPS_B
 ## Dependencies
 ```docker```
 ## Usage
+
+To build your own image run the following. At least one valid webhook (Slack or Discord) is required.
 ``` sh
 $ git clone git@github.com:devzx/devops-borat-go.git
 $ cd devops-borat-go
-```
-To build your own image run the following. At least one valid webhook (Slack or Discord) is required.
-```
 $ docker build -t borat .
 $ docker run -d -e TWEET_FILE='./devops_borat_tweets.txt' -e SLACK_WEBHOOK='<Replace with your webhook>' -e DISCORD_WEBHOOK='<Replace with your webhook>' --name borat borat
 ```
