@@ -18,7 +18,7 @@ func assertError(t *testing.T, got, want error) {
 	if got == nil {
 		t.Error("want an error got none")
 	}
-	if got != want {
+	if got.Error() != want.Error() {
 		t.Errorf("got '%s' want '%s'", got, want)
 	}
 }
@@ -65,6 +65,24 @@ func TestEnvironmentalVariables(t *testing.T) {
 		tweetFile, err := getEnvVar(testTweetFileEnvVarName, errTweetFileEnvVarNotFound)
 		assertNoError(t, err)
 		assertTrue(t, tweetFile, filePath)
+	})
+}
+
+func TestWebhookURL(t *testing.T) {
+	t.Run("invalid url", func(t *testing.T) {
+		URL := "awewae.not4valid,url"
+		want := false
+		if b := validURL(URL); b != want {
+			t.Errorf("got '%t' want '%t'", b, false)
+		}
+	})
+
+	t.Run("valid url", func(t *testing.T) {
+		URL := "https://webhook.slack.com/e1231/we1231"
+		want := true
+		if b := validURL(URL); b != want {
+			t.Errorf("got '%t' want '%t'", b, want)
+		}
 	})
 }
 

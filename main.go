@@ -8,6 +8,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -33,6 +34,14 @@ func getEnvVar(name string, err error) (string, error) {
 		return envVar, nil
 	}
 	return "", err
+}
+
+func validURL(rawurl string) bool {
+	_, err := url.ParseRequestURI(rawurl)
+	if err != nil {
+		return false
+	}
+	return true
 }
 
 func openTweetFile(file string) (*os.File, error) {
@@ -131,6 +140,7 @@ type service interface {
 }
 
 func main() {
+	// To-Do: Clean up all this error checking
 	slackWebhook, err := getEnvVar(slackWebhookEnvVarName, errWebhookEnvVarNotFound)
 	if err != nil {
 		log.Println(err)
@@ -156,10 +166,10 @@ func main() {
 
 	var services []service
 
-	if slackWebhook != "" {
+	if slackWebhook != "" && validURL(slackWebhook) {
 		services = append(services, &slack{contentType: "application/json", webhook: slackWebhook})
 	}
-	if discordWebhook != "" {
+	if discordWebhook != "" && validURL(discordWebhook) {
 		services = append(services, &discord{contentType: "application/json", webhook: discordWebhook})
 	}
 
