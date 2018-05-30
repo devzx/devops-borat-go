@@ -1,18 +1,26 @@
 services: docker
 
 env:
+  global:
+    - IMAGE_NAME: devzx/devops-borat
   matrix:
-  - secure: MlaKnEf/flGrWnRE2APDZ3RBIJAa0Mip7nufUzZgcXFchX6WVXJcx1VdnQNeU57LkgHGXmN/kzX+xQ2BdlYvqKb5MB8im0dB39jJCIJpMe/5JpK08GPXpnPi7SOy9H+TD9z72FyL6TFAc6V2sybeuEcYzIXZJ82jfjmK9Pn5s5iWfOZqGpn/baIHS712YHl+9egQ2kRNdzxtT6pLIL30h7ycO/z6MlQa5cdjH2QqhRPfQt9HIMWQtpzJMpE7ZLD7VmntZe1LA3NF3DF9+rDPGIt0pcNtfW9kM+0A6F0qxJ8wZM5RhPkiTaU0J33fVbvqtabICnLdc6kdJZ398h1RHHrZL+e/1DS3l7MVCuvPSyVkiqJTtAYRNJtEjhjUSTpgwEOzuGcEzDpJ4FxxMBoAx4bdIfqw0rOUbeC/P8/dbwbC8JswpiP9sgmSWKIdUKrA5dWL8FqpESM2hJcDYh5+druqOCBCgbJ4SH/YIRmwHgngNoUvxzHShp8Bjf3VF9gvgF+NT8bIWxgHIJdh2KMLl4SaTznjTFtHxpPp/2J534OHItuTqCW/mz1SdkkopCQHOZd7z/O6PuRSEPyAKAP7oNIHoQSBg7vmk76cUQyw1+f0HuEkyggPNc38gWravgfz9rAuZRHem0toPe4H1MUT1CmAuoVwKoeOppcFvSf0azs=
-  - secure: OSZR250erbSplHvrMysTcshxVuoa085LkLyks3X9Q3yat8oLRdF4Bo8FrW4BwOP08sMWAiGkeIEJe8hm/bwaJTgTc1U2DWnljssQOlYrpb9veVfbOz/tkuD3dgBRjYu17ErBsR+745IdgcfDlAHusi9Ukmo8UyJT8vTbO329qr3nwKuqZMfD7CfbF2VHoQHSFV0jK7duU0gK6jVpUZhIpMtZnRuEVZFpCo3zekVGYPOvTEedyWbYqVj8mIXe0f2LZzTmqjybFrTzZUGcx4ZQ+v24+bGnOr4NcBpA1me5/TOTnYOo1E/ohxfNjVRB2t6G23zUha+VWkjxB1dlu8z+A9bi0ATEGmsdJwhOergtToOyCHVNyo3l2vPPdmlX3flLWLeaobxIj1Gm4X1sIR6XDd2NfSWnFoW7lvj3Vzsj97H/zo/b0NkSA2vHVfa87F1MkfY0XXrB0F2dYCmUPhRRQ2PdpuRtRxTlfGuOWHXI0odi1zyQ/XmhB00C7P9kX76yfqRfsQyHnwdFMP8dIiWWnKdICH83J1VGTPdwC1l+2cHdPDjsW8SwjqhmkRc7N4RezzXCHUOZwYb/a8vZpmTK6W/VBafqoL9WXueUl58BUKyd7VxC4y/Hd2HigfyY3Z5kz9hoMUb1jRVGcEBg1YpmyBlryAXv068PdDUbGJvd9yk=
+    secure: YIO1hG2JTDD15jUBNzvHKKPP7LyKlZ+jegB755btfwoHSHDTzB8GEeXH9Bc6ciix91WIZ9rZir5Qvd6GN8eHmvci5SFSbe0qp4APMU2bIuHxD42OTwuV7o1+E+dQuO4DUJBZZR2Iw7YxOtQDOR5p2M0qyQo/9tfZn+4MDnOCjcUKttTo2dl91KNPkt48a9xe17dWD/F9x+H+4C1QcSkOzlm6u7JYmDyqWzYAOpVu7Iu13/+jim1jbJKAbpSzkxzsqonDOMR6056cPmaF/a+63fHi8/HLVNg8dLdU9funMamXMJ6uutpT/n0Dxs3xMD1LYraEsuGTCBgfWFAwKLHn7QKvfzsIF3uDb4YvbeNpjyakPlqjDNOeKA0Dv6wco2zPRdcBO3noLVfk3SYi5uGTOht1/1EzQURnETWdSiOdXmJnJO20TayHy+9k48lqpdoCGBbhITeORN6uaMyJBBIo4w9lZSZAxZebIWBdTlzJm9YRWLkizucGGLN/732U8DUXLZlNlw8cuE4uCQdhrU53CtB3HYJGTWCzfjgHJpYejV21z6Lm6zWbQA1kKMCWmesUCgIxRn/CqU2J/Y0JphPdEtygdSvGy6oiVct0sZheEOoENMr18a9kP50vvJ+GRfvbzL0MRnRuT/rCdKawJ73tBTIYlFP0Bk5TKNy1PjFY018=
 
 install: true
 
 notfications:
   email: false
 
-
 script:
-  - docker build -t devzx/devops-borat .
+  - docker build -t $IMAGE_NAME .
 
-after_script:
-  - docker images
+before_deploy:
+  - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+  - docker tag $IMAGE_NAME:latest
+  - docker tag $IMAGE_NAME:$TRAVIS_COMMIT
+
+deploy:
+  provider: script
+  script: docker push $IMAGE_NAME:latest && docker push $IMAGE_NAME:$TRAVIS_COMMIT
+  on:
+    branch: master
