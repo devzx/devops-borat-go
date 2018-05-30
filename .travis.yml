@@ -1,5 +1,4 @@
 services: docker
-
 env:
   global:
   - IMAGE_NAME: devzx/devops-borat
@@ -8,8 +7,10 @@ env:
 
 install: true
 
-notfications:
+notifications:
   email: false
+  slack:
+    secure: FMo9rryIloNsFRmUyLAcIyIOrsdLHvDxJ8tjDJeJfl3AVkimGlQxxt1PyhZxCG/pR6zPFXrSHf70gsWNLtVwtWSLCRNAZ0ui0HtQB//OtnadIyi8FaNGcUI9Jd9iz9jhb+BgUD4GoMjuJb8p+A9Z+59ecLMMybrqdkTSAAoYF+Fe8ZZ+3G8IGommYEQPIil6ZXVyXPE5IRUiCByVTHZgpWOSmAFnURwyIUCKGRtSBWt3ZdYplKDEyyKTEySOTacNZd4rXWjEjd5e0sL9Wptl4aXepPrA/niWAULYfjUDIH8WZS/l7um9g2cJIT8YTQGeBJIaLsdqIURTjs2MPEmVmEyb7Rt6wWXG1I/DuKVMz90WLcfUG3cRRXXZifn2FnxXHWJEL0mWibcDBVTpLxxckwCqyNqu/5FruH0Z01D4GUcHqdmNzh4LNRBqeuf5MjoSqtoUX7g+bOQ7O/IwMJnXdHtZyI0yyJPwKxPmnek0FFXZ3zF1CEttWfPfXYWHw3e6xu3Ln2PlheIjoq1r2sfVt0x74Nq8+FCvk5wqaI6V+/tzZmuctMBMVN4RAlrb+KTLO3dsSWCi5iLAVjIZbhRS1tipF1bh3NB7h4BqZgr3OEX8zd/kyd8a/atXNMZLrtIo/00WVxEd3wCwyNNkHUPr92haYgHrhnrKb+tkda8v138=
 
 script:
   - docker build -t $IMAGE_NAME .
