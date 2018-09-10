@@ -1,4 +1,4 @@
-FROM golang:alpine3.7 as builder
+FROM golang:stretch as builder
 COPY . /src
 WORKDIR /src
 RUN go test -v
