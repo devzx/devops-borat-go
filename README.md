@@ -5,7 +5,7 @@
 Rewrite of https://github.com/devzx/devops-borat in [Golang](https://golang.org/).  
 A fun little app that posts a random [DevOps Borat](https://twitter.com/DEVOPS_BORAT) tweet to a given chat channel.  
 
-## Why rewrite?
+## Why?
 - Become more familiar with Go
 - Become more familiar with TDD
 - Implement CI with Travis
